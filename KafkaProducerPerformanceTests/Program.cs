@@ -13,19 +13,21 @@ namespace KafkaProducerPerformanceTests
 {
     class Program
     {
+        private const int TargetTotalBytes = 500_000_000;
+
         static async Task Main(string[] args)
         {
             var statsList = new List<Stats>();
 
             var messageSizes = new[] {50, 100, 1_000, 10_000};
-            // var messageSizes = new[] {50, 100};
-            var messagesCount = 100_000;
 
             // Warmup
-            await RunWithCallbacks(messagesCount, CreateMessage(10), null, null);
+            await RunWithCallbacks(100_000, CreateMessage(10), null, null);
 
             foreach (var messageSize in messageSizes)
             {
+                var messagesCount = TargetTotalBytes / messageSize;
+
                 Console.WriteLine();
                 Console.WriteLine();
                 WriteTitle($"{messagesCount:#,###} messages of {messageSize:#,###} bytes");
@@ -42,9 +44,9 @@ namespace KafkaProducerPerformanceTests
                 statsList.Add(await RunSilverbackRawProduceAsyncWithCallbacks(messagesCount, CreateMessage(messageSize), 100, null));
                 statsList.Add(await RunSilverbackRawProduceAsyncWithCallbacks(messagesCount, CreateMessage(messageSize), 100, 50_000_000));
 
-                statsList.Add(await RunSilverbackRawProduceWithCallbacks(messagesCount, CreateMessage(messageSize), null, null));
-                statsList.Add(await RunSilverbackRawProduceWithCallbacks(messagesCount, CreateMessage(messageSize), 100, null));
-                statsList.Add(await RunSilverbackRawProduceWithCallbacks(messagesCount, CreateMessage(messageSize), 100, 50_000_000));
+                // statsList.Add(await RunSilverbackRawProduceWithCallbacks(messagesCount, CreateMessage(messageSize), null, null));
+                // statsList.Add(await RunSilverbackRawProduceWithCallbacks(messagesCount, CreateMessage(messageSize), 100, null));
+                // statsList.Add(await RunSilverbackRawProduceWithCallbacks(messagesCount, CreateMessage(messageSize), 100, 50_000_000));
             }
 
             WriteSummary(statsList);
@@ -59,7 +61,9 @@ namespace KafkaProducerPerformanceTests
             {
                 BootstrapServers = "PLAINTEXT://localhost:9092",
                 LingerMs = lingerMs,
-                BatchSize = batchSize
+                BatchSize = batchSize,
+                QueueBufferingMaxMessages = 10_000_000,
+                QueueBufferingMaxKbytes = TargetTotalBytes
             };
             var producer = new ProducerBuilder<byte[], byte[]>(producerConfig).Build();
             var stopwatch = Stopwatch.StartNew();
@@ -82,7 +86,9 @@ namespace KafkaProducerPerformanceTests
             {
                 BootstrapServers = "PLAINTEXT://localhost:9092",
                 LingerMs = lingerMs,
-                BatchSize = batchSize
+                BatchSize = batchSize,
+                QueueBufferingMaxMessages = 10_000_000,
+                QueueBufferingMaxKbytes = TargetTotalBytes
             };
             var producer = new ProducerBuilder<byte[], byte[]>(producerConfig).Build();
             var stopwatch = Stopwatch.StartNew();
@@ -116,7 +122,9 @@ namespace KafkaProducerPerformanceTests
             {
                 BootstrapServers = "PLAINTEXT://localhost:9092",
                 LingerMs = lingerMs,
-                BatchSize = batchSize
+                BatchSize = batchSize,
+                QueueBufferingMaxMessages = 10_000_000,
+                QueueBufferingMaxKbytes = TargetTotalBytes
             };
             var producer = new ProducerBuilder<byte[], byte[]>(producerConfig).Build();
             var stopwatch = Stopwatch.StartNew();
@@ -159,6 +167,8 @@ namespace KafkaProducerPerformanceTests
                             {
                                 config.LingerMs = lingerMs;
                                 config.BatchSize = batchSize;
+                                config.QueueBufferingMaxMessages = 10_000_000;
+                                config.QueueBufferingMaxKbytes = TargetTotalBytes;
                             }))))
                 .Services.BuildServiceProvider();
 
@@ -205,6 +215,8 @@ namespace KafkaProducerPerformanceTests
                             {
                                 config.LingerMs = lingerMs;
                                 config.BatchSize = batchSize;
+                                config.QueueBufferingMaxMessages = 10_000_000;
+                                config.QueueBufferingMaxKbytes = TargetTotalBytes;
                             }))))
 
                 .Services.BuildServiceProvider();
@@ -261,6 +273,8 @@ namespace KafkaProducerPerformanceTests
                             {
                                 config.LingerMs = lingerMs;
                                 config.BatchSize = batchSize;
+                                config.QueueBufferingMaxMessages = 10_000_000;
+                                config.QueueBufferingMaxKbytes = TargetTotalBytes;
                             }))))
                 .Services.BuildServiceProvider();
 
@@ -316,6 +330,8 @@ namespace KafkaProducerPerformanceTests
                             {
                                 config.LingerMs = lingerMs;
                                 config.BatchSize = batchSize;
+                                config.QueueBufferingMaxMessages = 10_000_000;
+                                config.QueueBufferingMaxKbytes = TargetTotalBytes;
                             }))))
                 .Services.BuildServiceProvider();
 
@@ -371,6 +387,8 @@ namespace KafkaProducerPerformanceTests
                             {
                                 config.LingerMs = lingerMs;
                                 config.BatchSize = batchSize;
+                                config.QueueBufferingMaxMessages = 10_000_000;
+                                config.QueueBufferingMaxKbytes = TargetTotalBytes;
                             }))))
                 .Services.BuildServiceProvider();
 
